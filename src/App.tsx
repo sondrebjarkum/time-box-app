@@ -1,7 +1,7 @@
 
 import { Component, createEffect, createMemo, createSignal, onCleanup } from 'solid-js';
 import { createStore } from "solid-js/store";
-import { Button, Center, Container, Flex, FormControl, FormLabel, Heading, HStack, IconButton, Input, InputGroup, InputRightAddon, Stack } from '@hope-ui/solid';
+import { Button, Center, Container, Divider, Flex, FormControl, FormLabel, Heading, HStack, IconButton, Input, InputGroup, InputRightAddon, Stack } from '@hope-ui/solid';
 import IntervalsList from './components/Timer/IntervalsList';
 import { ITimeItem, ITimeItems } from './components/Timer/ITimeItem';
 import ModalManager, { onClose, onOpen } from './components/ModalManager/ModalManager';
@@ -131,16 +131,20 @@ const App: Component = () => {
         </Flex>
       </Flex>
 
-      <Container maxW={1000}>
+      <Container maxW={1000} p="$4">
         <Center>
           <Heading size="9xl">{currentTimeString()}</Heading>
         </Center>
+
+        <Divider mt="$4" mb="$4" />
 
         <HStack spacing={"$4"}>
           <Button disabled={time.length === 0} onClick={() => toggleTimer()}>{countdownStarted() ? "Pause" : "Start"}</Button>
           <Button disabled={time.length === 0} onClick={() => clearTimers()}>Clear</Button>
           <Button disabled={time.length === 0} onClick={() => stopCountdown()}>Stop</Button>
         </HStack>
+
+        <Divider mt="$4" mb="$4" />
 
         <Stack spacing={"$4"}>
           <FormControl>

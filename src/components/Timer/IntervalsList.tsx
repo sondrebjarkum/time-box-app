@@ -1,4 +1,4 @@
-import { Component, createEffect, For } from 'solid-js';
+import { Component, createEffect, For, Show } from 'solid-js';
 import {
     Table,
     TableCaption,
@@ -10,7 +10,8 @@ import {
     Td,
     Button,
     Box,
-    css
+    css,
+    HStack
 } from "@hope-ui/solid"
 // import { timeItems, setTimeItems, currentTimeItem, countdownStarted } from '../../App';
 import { parseTime } from '../Services/timer.service';
@@ -18,6 +19,7 @@ import { TransitionGroup } from 'solid-transition-group';
 import { ITimeItem } from './ITimeItem';
 import { useTimer } from './TimeItemsProvider';
 import { countdownStarted, currentTimeItem, isPaused } from '../../App';
+import { FiMoreVertical } from 'solid-icons/fi';
 
 
 const IntervalsList: Component<{ currentTime : number }> = (props) => {
@@ -68,11 +70,16 @@ const IntervalsList: Component<{ currentTime : number }> = (props) => {
                                         pos={"relative"}
                                     >
                                         <Td>{timeItem.label}</Td>
-                                        <Td numeric>{parseTime(timeItem.time)}</Td>
-                                        <Box 
-                                            class={bgShifter()} 
-                                            w={props.currentTime / time[currentTimeItem()]?.time * 100 +"%"}
-                                        />
+                                        <Td numeric>
+                                            {parseTime(timeItem.time)}
+                                        </Td>
+                                        <Show when={(timeItem.id === time[currentTimeItem()]?.id)}>
+                                            <Box 
+                                                class={bgShifter()} 
+                                                w={props.currentTime / time[currentTimeItem()]?.time * 100 +"%"}
+                                            />
+                                        </Show>
+                                        
 
 
                                         {/* <Box  class={bgShifter()}></Box> */}
