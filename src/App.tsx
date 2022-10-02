@@ -56,7 +56,7 @@ const App: Component = () => {
     if (countdownTime() === 0 && countdownStarted()) {
       clearTimer()
     }
-  }, 100)
+  }, 1000)
 
   onCleanup(() => clearInterval(interval));
 
@@ -160,7 +160,7 @@ const App: Component = () => {
         </Stack>
 
 
-        <IntervalsList />
+        <IntervalsList currentTime={countdownTime()} />
 
 
       </Container>

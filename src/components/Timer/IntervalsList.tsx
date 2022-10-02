@@ -9,7 +9,8 @@ import {
     Th,
     Td,
     Button,
-    Box
+    Box,
+    css
 } from "@hope-ui/solid"
 // import { timeItems, setTimeItems, currentTimeItem, countdownStarted } from '../../App';
 import { parseTime } from '../Services/timer.service';
@@ -18,27 +19,36 @@ import { ITimeItem } from './ITimeItem';
 import { useTimer } from './TimeItemsProvider';
 import { countdownStarted, currentTimeItem, isPaused } from '../../App';
 
-const IntervalsList: Component<{ timeItems ?: ITimeItem[] }> = (props) => {
+
+const IntervalsList: Component<{ currentTime : number }> = (props) => {
 
     const [time]: any = useTimer();
 
-    const iscurrentTimedRow = (id : string) =>
-        (id === time[currentTimeItem()]?.id) ? 
-            countdownStarted() ? "$primary9" : isPaused() ? "$neutral5" : "$default" : "$default"
-
-        // (id === time[currentTimeItem()]?.id && countdownStarted()) 
-        // ? "$primary9"
-        //     : isPaused()
-        //     ? "$neutral5"
-        // : "$default"
+    const isCurrentTimedRow = (id : string) =>
+        (id === time[currentTimeItem()]?.id) ?
+            countdownStarted() ? gradient() : isPaused() ? "$neutral5" : "$default" : "$default"
 
     const openModal = () => {
         console.log("open!")
     }
 
+
+    const bgShifter = css({
+        content: "",
+        pos : "absolute",
+        left : 0,
+        h: "100%",
+        // h: 100,
+        pointerEvents: "none",
+        bg: "$primary9",
+        filter: "opacity(20%)",
+        transition: "all 1s linear"
+    });
+    const gradient = () => `linear-gradient(90deg, rgba(2,0,36,1) ${props.currentTime / time[currentTimeItem()]?.time * 100}%, rgba(0,212,255,0) ${props.currentTime / time[currentTimeItem()]?.time * 100}%)`
+
+
     return (
         <Box>
-
             <Table highlightOnHover>
                 {/* <TableCaption>Imperial to metric conversion factors</TableCaption> */}
                 <Thead>
@@ -54,12 +64,18 @@ const IntervalsList: Component<{ timeItems ?: ITimeItem[] }> = (props) => {
                                 return (
                                     <Tr
                                         onClick={() => openModal()}
-                                    // bgColor={(timeItem.id === timeItems[currentTimeItem()].id && countdownStarted()) ? "$primary9" : "$default"}
-                                    bgColor={iscurrentTimedRow(timeItem.id as string)}
-
+                                        // bg={isCurrentTimedRow(timeItem.id as string)}
+                                        pos={"relative"}
                                     >
                                         <Td>{timeItem.label}</Td>
                                         <Td numeric>{parseTime(timeItem.time)}</Td>
+                                        <Box 
+                                            class={bgShifter()} 
+                                            w={props.currentTime / time[currentTimeItem()]?.time * 100 +"%"}
+                                        />
+
+
+                                        {/* <Box  class={bgShifter()}></Box> */}
                                     </Tr>
                                 )
                             }
