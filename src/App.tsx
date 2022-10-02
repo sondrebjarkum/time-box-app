@@ -1,3 +1,4 @@
+
 import { Component, createEffect, createMemo, createSignal, onCleanup } from 'solid-js';
 import { createStore } from "solid-js/store";
 import { Button, Center, Container, Flex, FormControl, FormLabel, Heading, HStack, IconButton, Input, InputGroup, InputRightAddon, Stack } from '@hope-ui/solid';
@@ -5,12 +6,13 @@ import IntervalsList from './components/Timer/IntervalsList';
 import { ITimeItem, ITimeItems } from './components/Timer/ITimeItem';
 import ModalManager, { onClose, onOpen } from './components/ModalManager/ModalManager';
 import { createUUID } from './components/Services/uuid.service';
-import { parseMinutes, parseTime, playAlarm as playAlert } from './components/Services/timer.service';
+import { parseMinutes, parseTime, playAlert } from './components/Services/timer.service';
 import { useTimer } from './components/Timer/TimeItemsProvider';
 import SidebarMenu, { openSidebarMenu } from './components/Menubar/Menu';
 import { FiSettings } from 'solid-icons/fi'
 import { Text } from "@hope-ui/solid"
 import { storage } from './components/Services/files.service';
+import styles from './index.css'
 
 // export const [timeItems, setTimeItems] = createStore<ITimeItem[]>([])
 export const [countdownStarted, setCountdownStarted] = createSignal<boolean>(false)//TODO hent verdi fra localstorage
@@ -26,7 +28,7 @@ const App: Component = () => {
   const [isValid, setIsValid] = createSignal<boolean>()
   const handleInputM = (event: any) => setMinutesValue(event.target.value);
   const handleInputL = (event: any) => setLabelValue(event.target.value);
-  const [countdownTime, setCountdownTime] = createSignal<number>(0);
+  const [countdownTime, setCountdownTime] = createSignal<number>(0); //sekunder?
 
   const clearTimers = () => {
     clear()
@@ -45,12 +47,16 @@ const App: Component = () => {
   const toggleCurrentTimerItemState = () => setCurrentTimeItem( e => e < 0 ? 0 : -1 )
 
   const interval = setInterval(() => {
-    if (countdownStarted()) setCountdownTime(e => e - 10) //TODO -1
+    if (countdownStarted()) setCountdownTime(e => e - 1)
+
+    if(countdownTime() == parseInt(storage.get("alertTiming"), 10) && countdownStarted()){
+      playAlert( storage.get("alert") + ".mp3" )
+    }
 
     if (countdownTime() === 0 && countdownStarted()) {
       clearTimer()
     }
-  }, 1000)
+  }, 100)
 
   onCleanup(() => clearInterval(interval));
 
@@ -59,7 +65,9 @@ const App: Component = () => {
     trudgeTimeItems()
 
     if (countdownStarted()) {
-      if(currentTimeItem() !== 0 && storage.get("alertOn") === "yes") playAlert( storage.get("alert") + ".mp3" )
+      if(currentTimeItem() !== 0 && storage.get("alertOn") === "y"){ 
+        playAlert( storage.get("alert") + ".mp3" )
+      }
       startTimer()
     }
   })
@@ -91,13 +99,6 @@ const App: Component = () => {
   })
 
   const addTimeItem = () => {
-    // setTimeItems(
-    //   [...timeItems, {
-    //     id: createUUID(),
-    //     time: minutesValue() as number * 60,
-    //     label: labelValue(),
-    //     alert: false
-    //   }])
     add(
       {
         id: createUUID(),

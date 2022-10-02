@@ -3,6 +3,7 @@ import { Component, createEffect, createSignal, For, onMount } from "solid-js";
 import { Text } from "@hope-ui/solid"
 import { FiCheck } from 'solid-icons/fi'
 import { storage } from "../Services/files.service";
+import { setInterval } from "timers/promises";
 
 interface Interface {
     name: string,
@@ -30,6 +31,11 @@ const checkboxRootStyles = css({
         borderColor: "transparent",
         bg: "#0c4a6e",
         color: "white",
+    },
+    "data-checked" : {
+        borderColor: "transparent",
+        bg: "#0c4a6e",
+        color: "white",
     }
 });
 
@@ -53,16 +59,16 @@ export default function CCheckbox(props : Interface) {
     }
     createEffect( () =>{
         console.log("toggle", props.initValue)
+        console.log("internalstate", internalState())
     })
     return (
-        <CheckboxGroup>
             <VStack spacing="$4">
                 <CheckboxPrimitive
                     checked={internalState()}
-                    defaultChecked={true}
+                    defaultChecked={internalState()}
+                    onChange={e => toggleStateHandler(e)}
                     value={1}
                     class={checkboxRootStyles()}
-                    // onChange={e => toggleStateHandler(e)}
                 >
                     <HStack justifyContent="space-between" w="$full">
                         <VStack alignItems="flex-start">
@@ -87,6 +93,5 @@ export default function CCheckbox(props : Interface) {
                     </HStack>
                 </CheckboxPrimitive>
             </VStack>
-        </CheckboxGroup>
     )
 };
