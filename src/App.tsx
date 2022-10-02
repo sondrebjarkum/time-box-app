@@ -67,11 +67,8 @@ const App: Component = () => {
   }
 
   const trudgeTimeItems = () => {
-    //TODO sjekk om ikke flere items, mao sjekk om timeItems har en next
-    // if (currentTimeItem() === timeItems.length - 1) {
     if (currentTimeItem() === time.length - 1) {
       setCountdownStarted(e => !e)
-      // setCurrentTimeItem(e => 0)
       toggleCurrentTimerItemState()
       return
     }
@@ -88,13 +85,6 @@ const App: Component = () => {
   })
 
   const addTimeItem = () => {
-    // setTimeItems(
-    //   [...timeItems, {
-    //     id: createUUID(),
-    //     time: minutesValue() as number * 60,
-    //     label: labelValue(),
-    //     alert: false
-    //   }])
     add(
       {
         id: createUUID(),
@@ -107,13 +97,14 @@ const App: Component = () => {
   }
 
   const stopCountdown = () => {
-    toggleTimer()
     onCleanup
+    setCountdownStarted(e => !e)
     setCountdownTime( e => 0)
     toggleCurrentTimerItemState()
   }
 
   const [time, { add, remove, clear }]: any = useTimer();
+
   return (
     <>
       <Flex bg={"$blackAlpha7"} p={"$4"} w={"100%"} justifyContent={"space-between"}>
@@ -135,9 +126,9 @@ const App: Component = () => {
         <HStack spacing={"$4"}>
           {/* <Button disabled={timeItems.length === 0} onClick={() => toggleTimer()}>{countdownStarted() ? "Stop" : "Start"}</Button>
           <Button disabled={timeItems.length === 0} onClick={() => clearTimers()}>Clear</Button> */}
-          <Button disabled={time.length === 0} onClick={() => toggleTimer()}>{countdownStarted() ? "Pause" : "Start"}</Button>
-          <Button disabled={time.length === 0} onClick={() => clearTimers()}>Clear</Button>
-          <Button disabled={time.length === 0} onClick={() => stopCountdown()}>Stop</Button>
+          <Button disabled={time.length === 0}                       onClick={() => toggleTimer()}>{countdownStarted() ? "⏸︎" : "⏵︎"}</Button>
+          <Button disabled={time.length === 0 || countdownStarted()} onClick={() => stopCountdown()}>⏹︎</Button>
+          <Button disabled={time.length === 0 || countdownStarted()} onClick={() => clearTimers()}>Clear</Button>
         </HStack>
 
         <Stack spacing={"$4"}>
