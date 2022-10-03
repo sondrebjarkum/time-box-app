@@ -6,7 +6,7 @@ import IntervalsList from './components/Timer/IntervalsList';
 import { ITimeItem, ITimeItems } from './components/Timer/ITimeItem';
 import ModalManager, { onClose, onOpen } from './components/ModalManager/ModalManager';
 import { createUUID } from './components/Services/uuid.service';
-import { parseMinutes, parseTime, playAlert } from './components/Services/timer.service';
+import { parseTime, playAlert } from './components/Services/timer.service';
 import { useTimer } from './components/Timer/TimeItemsProvider';
 import SidebarMenu, { openSidebarMenu } from './components/Menubar/Menu';
 import { FiPause, FiPlay, FiSettings } from 'solid-icons/fi'

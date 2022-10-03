@@ -22,7 +22,9 @@ import {
     createDisclosure,
     FormControl,
     FormLabel,
-    Input
+    Input,
+    VStack,
+    IconButton
 } from "@hope-ui/solid"
 // import { timeItems, setTimeItems, currentTimeItem, countdownStarted } from '../../App';
 import { parseTime } from '../Services/timer.service';
@@ -30,25 +32,71 @@ import { TransitionGroup } from 'solid-transition-group';
 import { ITimeItem } from './ITimeItem';
 import { useTimer } from './TimeItemsProvider';
 import { countdownStarted, currentTimeItem, isPaused } from '../../App';
-import { FiMoreVertical } from 'solid-icons/fi';
+import { FiArrowDown, FiArrowUp, FiEdit, FiMoreVertical } from 'solid-icons/fi';
+import { showNotification } from '../Services/notification.service';
 
 
 const IntervalsList: Component<{ currentTime: number }> = (props) => {
     const { isOpen, onOpen, onClose } = createDisclosure()
 
-    const [time]: any = useTimer();
+    const [time, { getTotalTime, reArrange, edit, remove }]: any = useTimer();
 
     const isCurrentTimedRow = (id: string) =>
         (id === time[currentTimeItem()]?.id) ?
             countdownStarted() ? gradient() : isPaused() ? "$neutral5" : "$default" : "$default"
 
-    const [intervalForEdit, setIntervalForEdit] = createSignal<ITimeItem>({id: "", time: 1, label: "" })
-    
+    const [intervalForEdit, setIntervalForEdit] = createSignal<ITimeItem>({ id: "", time: 0, label: "" })
+
     const openEditTimeItemModal = (id: string) => {
-        setIntervalForEdit(e => time.find( (x : ITimeItem) => x.id == id))
+        console.log("id", id)
+        const item = time.find((x: ITimeItem) => x.id == id)
+        console.log("time item",item)
+        const mdadd = {id: item.id, label: item.label, time: item.time}
+        setIntervalForEdit(e => mdadd)
         onOpen()
     }
 
+    const shiftItem = (id: string, direction: string) => {
+        reArrange(id, direction)
+    }
+
+    const saveInterval = () => {
+        try{
+            edit(intervalForEdit().label, intervalForEdit().time, intervalForEdit().id)
+        }catch(e){
+            showNotification({
+                title: "failure",
+                description: "Editing interval failed",
+                status : "danger"
+            })
+            return
+        }
+        showNotification({
+            title: "Success",
+            description: "Edits to interval saved",
+            status: "success"
+        })
+        onClose()
+    }
+
+    const deleteInterval = () => {
+        try{
+            remove(intervalForEdit().id)
+        }catch(e){
+            showNotification({
+                title: "failure",
+                description: "Editing interval failed",
+                status : "danger"
+            })
+            return
+        }
+        showNotification({
+            title: "Success",
+            description: "Interval deleted",
+            status: "success"
+        })
+        onClose()
+    }
 
     const bgShifter = css({
         content: "",
@@ -63,15 +111,19 @@ const IntervalsList: Component<{ currentTime: number }> = (props) => {
     });
     const gradient = () => `linear-gradient(90deg, rgba(2,0,36,1) ${props.currentTime / time[currentTimeItem()]?.time * 100}%, rgba(0,212,255,0) ${props.currentTime / time[currentTimeItem()]?.time * 100}%)`
 
-
+    createEffect( () => {
+        console.log(intervalForEdit())
+    })
     return (
         <Box>
-            <Table highlightOnHover>
+            <Table >
                 {/* <TableCaption>Imperial to metric conversion factors</TableCaption> */}
                 <Thead>
                     <Tr>
                         <Th>Label</Th>
                         <Th numeric>Time</Th>
+                        <Th w={50}></Th>
+
                     </Tr>
                 </Thead>
                 <Tbody>
@@ -80,14 +132,46 @@ const IntervalsList: Component<{ currentTime: number }> = (props) => {
                             (timeItem: ITimeItem) => {
                                 return (
                                     <Tr
-                                        onClick={() => openEditTimeItemModal(timeItem.id as string)}
+
                                         // bg={isCurrentTimedRow(timeItem.id as string)}
                                         pos={"relative"}
                                     >
                                         <Td>{timeItem.label}</Td>
-                                        <Td numeric>
-                                            {parseTime(timeItem.time)}
+                                        <Td numeric>{parseTime(timeItem.time)}</Td>
+
+                                        <Td numeric ml={"100%"}>
+                                            <HStack>
+                                                <VStack>
+                                                    <IconButton
+                                                size={"xs"}
+
+                                                        disabled={countdownStarted()}
+                                                        onClick={() => shiftItem(timeItem.id as string, "up")}
+                                                        variant="ghost"
+                                                        aria-label="up"
+                                                        colorScheme="accent" icon={<FiArrowUp />}>
+                                                    </IconButton>
+                                                    <IconButton
+                                                size={"xs"}
+
+                                                        disabled={countdownStarted()}
+                                                        onClick={() => shiftItem(timeItem.id as string, "down")}
+                                                        variant="ghost"
+                                                        aria-label="down"
+                                                        colorScheme="accent" icon={<FiArrowDown />}>
+                                                    </IconButton>
+
+                                                </VStack>
+                                                <IconButton
+                                                    disabled={countdownStarted()}
+                                                    onClick={() => openEditTimeItemModal(timeItem.id as string)}
+                                                    variant="ghost"
+                                                    aria-label="edit"
+                                                    colorScheme="accent" icon={<FiEdit />}>
+                                                </IconButton>
+                                            </HStack>
                                         </Td>
+
                                         <Show when={(timeItem.id === time[currentTimeItem()]?.id)}>
                                             <Box
                                                 class={bgShifter()}
@@ -104,13 +188,14 @@ const IntervalsList: Component<{ currentTime: number }> = (props) => {
                         }
                     </For>
                 </Tbody>
-                {/* <Tfoot>
+                <Tfoot>
                     <Tr>
-                        <Th>
-                            <Button onClick={() => addItem()} >add</Button>
+                        <Th></Th>
+                        <Th numeric>
+                            Total: {getTotalTime}
                         </Th>
                     </Tr>
-                </Tfoot> */}
+                </Tfoot>
             </Table>
 
             <Modal opened={isOpen()} onClose={onClose}>
@@ -121,15 +206,16 @@ const IntervalsList: Component<{ currentTime: number }> = (props) => {
                     <ModalBody>
                         <FormControl id="label" mb="$4">
                             <FormLabel>Label</FormLabel>
-                            <Input placeholder="Label" value={intervalForEdit().label} />
+                            <Input placeholder="Label" value={intervalForEdit().label} onChange={(e : any) => setIntervalForEdit(x => x.label = e.target.value)} />
                         </FormControl>
                         <FormControl id="minutes">
                             <FormLabel>Minutes</FormLabel>
-                            <Input placeholder="Minutes" value={intervalForEdit().time}/>
+                            <Input placeholder="Minutes" value={intervalForEdit().time} onChange={(e : any) => setIntervalForEdit(x => x.time = e.target.value)} />
                         </FormControl>
                     </ModalBody>
-                    <ModalFooter>
-                        <Button onClick={onClose}>Save</Button>
+                    <ModalFooter gap={"$4"}>
+                        <Button colorScheme={"danger"} variant="ghost" onClick={() => {deleteInterval(); onClose}}>Delete</Button>
+                        <Button onClick={() => {saveInterval(); onClose}}>Save</Button>
                     </ModalFooter>
                 </ModalContent>
             </Modal>

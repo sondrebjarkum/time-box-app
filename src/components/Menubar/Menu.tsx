@@ -173,7 +173,7 @@ const SidebarMenu: Component = () => {
                                     {/* Toggle alert x-seconds before */}
                                     <FormControl>
                                         <VStack alignItems={"stretch"}>
-                                            <FormLabel for="alertbefore">Alert timing</FormLabel>
+                                            <FormLabel for="alertbefore">Alert me ahead of time!</FormLabel>
                                             <HStack gap={"$4"} >
                                                 <Text>0s</Text>
                                                 <input
@@ -188,7 +188,7 @@ const SidebarMenu: Component = () => {
                                                 <Text>59s</Text>
                                             </HStack>
                                         </VStack>
-                                        <FormHelperText>How many seconds an alert should play before next interval</FormHelperText>
+                                        <FormHelperText>How many seconds before the next interval an alert should play</FormHelperText>
                                     </FormControl>
 
                                     <Divider />
