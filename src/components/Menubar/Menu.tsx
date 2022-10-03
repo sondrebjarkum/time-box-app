@@ -38,7 +38,7 @@ import {
 } from "@hope-ui/solid"
 import { IProperties, listAlarmFileNames, playAlert } from '../Services/timer.service';
 import { showNotification } from '../Services/notification.service';
-import { storage } from '../Services/files.service';
+import { storage } from '../Services/storage.service';
 import CCheckbox from '../Custom/CCheckbox';
 
 const { isOpen, onOpen, onClose } = createDisclosure()
@@ -47,8 +47,8 @@ export const openSidebarMenu = onOpen
 const SidebarMenu: Component = () => {
     const [selectedAlert, setSelectedAlert] = createSignal(storage.get("alert") || "default")
     const [toggleAlert, setToggleAlert] = createSignal<boolean>(storage.get("alertOn") === "y")
-    const [alertTiming, setAlertTiming] = createSignal<number>(parseInt(storage.get("alertTiming")) || 0 )
-    const [alertVolume, setAlertVolume] = createSignal<IProperties["volume"]>(storage.get("alertVolume") as IProperties["volume"] || "100" )
+    const [alertTiming, setAlertTiming] = createSignal<number>(parseInt(storage.get("alertTiming")) || 0)
+    const [alertVolume, setAlertVolume] = createSignal<IProperties["volume"]>(storage.get("alertVolume") as IProperties["volume"] || "100")
 
 
     const setSelectedAlarmHandler = (alarm: any) => {
@@ -58,15 +58,24 @@ const SidebarMenu: Component = () => {
     }
     const setAlertVolumeHandler = (alarm: any) => {
         setAlertVolume(e => alarm)
-        playAlert(selectedAlert() + ".mp3", {volume : alertVolume()})
+        playAlert(selectedAlert() + ".mp3", { volume: alertVolume() })
         return alarm
     }
-
+    const clearStorage = () => {
+        storage.clear()
+        showNotification(
+            {
+                title: "Storage cleared",
+                description: "Everything is cleared!",
+                status: "success"
+            }
+        )
+    }
     const saveSettings = () => {
         try {
             storage.write("alert", selectedAlert())
             storage.write("alertOn", toggleAlert() ? "y" : "n")
-            storage.write("alertTiming", String(alertTiming() ) )
+            storage.write("alertTiming", String(alertTiming()))
             storage.write("alertVolume", alertVolume())
 
         } catch (e) {
@@ -133,10 +142,33 @@ const SidebarMenu: Component = () => {
                                                 </SelectListbox>
                                             </SelectContent>
                                         </Select>
-                                        {/* <FormHelperText>What sound to play when timer runs out.</FormHelperText> */}
                                     </FormControl>
 
-                                    <Divider />
+                                    {/* Alert volume */}
+                                    <FormControl>
+                                        <VStack alignItems={"stretch"}>
+                                            <FormLabel for="alertbefore">Alert volume</FormLabel>
+                                            <Select defaultValue="25" value={alertVolume()} onChange={setAlertVolumeHandler}>
+                                                <SelectTrigger>
+                                                    <SelectPlaceholder>Choose volume</SelectPlaceholder>
+                                                    <SelectValue />
+                                                    <SelectIcon />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectListbox>
+                                                        <For each={["25", "50", "75", "100"]}>
+                                                            {item => (
+                                                                <SelectOption value={item} >
+                                                                    <SelectOptionText >{item}%</SelectOptionText>
+                                                                    <SelectOptionIndicator />
+                                                                </SelectOption>
+                                                            )}
+                                                        </For>
+                                                    </SelectListbox>
+                                                </SelectContent>
+                                            </Select>
+                                        </VStack>
+                                    </FormControl>
 
                                     {/* Toggle alert x-seconds before */}
                                     <FormControl>
@@ -149,50 +181,29 @@ const SidebarMenu: Component = () => {
                                                     min="0"
                                                     max="59"
                                                     value={alertTiming()}
-                                                    onChange={(e : any) => setAlertTiming(a => e.target.value)}
+                                                    onChange={(e: any) => setAlertTiming(a => e.target.value)}
                                                     class="slider"
-                                                    style={{width : "100%"}}
+                                                    style={{ width: "100%" }}
                                                 />
                                                 <Text>59s</Text>
                                             </HStack>
                                         </VStack>
-                                        <FormHelperText>How many seconds before next timer alert is triggered</FormHelperText>
+                                        <FormHelperText>How many seconds an alert should play before next interval</FormHelperText>
                                     </FormControl>
 
-                                    {/* Alert volume */}
-                                    <FormControl>
-                                        <VStack alignItems={"stretch"}>
-                                            <FormLabel for="alertbefore">Alert volume</FormLabel>
-                                            <Select defaultValue="25" value={alertVolume()} onChange={setAlertVolumeHandler}>
-                                            <SelectTrigger>
-                                                <SelectPlaceholder>Choose volume</SelectPlaceholder>
-                                                <SelectValue />
-                                                <SelectIcon />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectListbox>
-                                                    <For each={["25", "50", "75", "100"]}>
-                                                        {item => (
-                                                            <SelectOption value={item} >
-                                                                <SelectOptionText >{item}%</SelectOptionText>
-                                                                <SelectOptionIndicator />
-                                                            </SelectOption>
-                                                        )}
-                                                    </For>
-                                                </SelectListbox>
-                                            </SelectContent>
-                                        </Select>
-                                        </VStack>
-                                        <FormHelperText>How many seconds before next timer starts to play alert</FormHelperText>
-                                    </FormControl>
+                                    <Divider />
+
+
                                 </VStack>
-
 
                             </TabPanel>
 
-
-                            <TabPanel>
-                                <Button onClick={() => storage.clear()}>Reset settings</Button>
+                            {/* Storage */}
+                            <TabPanel >
+                                <VStack alignItems={"flex-start"} spacing="$4">
+                                    <Button colorScheme={"success"} onClick={() => null}>Force save current timers</Button>
+                                    <Button colorScheme={"danger"} onClick={() => clearStorage()}>Clear Storage</Button>
+                                </VStack>
                             </TabPanel>
 
 

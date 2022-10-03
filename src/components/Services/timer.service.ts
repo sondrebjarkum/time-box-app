@@ -1,4 +1,4 @@
-import { storage } from "./files.service";
+import { storage } from "./storage.service";
 
 export const timer = () => null
 
@@ -19,4 +19,3 @@ export const listAlarmFileNames = ["default","clicks", "dark", "shrek", "onions"
 export interface IProperties{
     volume : "25" | "50"| "75"| "100"
 }
-// const volumeValues = "25" | "50"| "75"| "100"

@@ -9,7 +9,6 @@ export interface ITimeItem{
     id?: string,
     time: number,
     label: string,
-    alert: boolean
 }
 
 export interface ITimeItems extends Array<ITimeItem> {}

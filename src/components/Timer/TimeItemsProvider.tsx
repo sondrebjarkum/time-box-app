@@ -11,13 +11,11 @@ export function TimerProvider(props: any) {
             time,
             {
                 add(item: ITimeItem) {
-                    console.log("adding")
                     setTime(
                         [...time, {
                             id: item.id,
                             time: item.time as number * 60,
                             label: item.label,
-                            alert: false
                         }])
                 },
                 remove(id : string) {

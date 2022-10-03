@@ -1,4 +1,4 @@
-import { Component, createEffect, For, Show } from 'solid-js';
+import { Component, createEffect, createSignal, For, Show } from 'solid-js';
 import {
     Table,
     TableCaption,
@@ -11,7 +11,18 @@ import {
     Button,
     Box,
     css,
-    HStack
+    HStack,
+    Modal,
+    ModalBody,
+    ModalCloseButton,
+    ModalContent,
+    ModalFooter,
+    ModalHeader,
+    ModalOverlay,
+    createDisclosure,
+    FormControl,
+    FormLabel,
+    Input
 } from "@hope-ui/solid"
 // import { timeItems, setTimeItems, currentTimeItem, countdownStarted } from '../../App';
 import { parseTime } from '../Services/timer.service';
@@ -22,23 +33,27 @@ import { countdownStarted, currentTimeItem, isPaused } from '../../App';
 import { FiMoreVertical } from 'solid-icons/fi';
 
 
-const IntervalsList: Component<{ currentTime : number }> = (props) => {
+const IntervalsList: Component<{ currentTime: number }> = (props) => {
+    const { isOpen, onOpen, onClose } = createDisclosure()
 
     const [time]: any = useTimer();
 
-    const isCurrentTimedRow = (id : string) =>
+    const isCurrentTimedRow = (id: string) =>
         (id === time[currentTimeItem()]?.id) ?
             countdownStarted() ? gradient() : isPaused() ? "$neutral5" : "$default" : "$default"
 
-    const openModal = () => {
-        console.log("open!")
+    const [intervalForEdit, setIntervalForEdit] = createSignal<ITimeItem>({id: "", time: 1, label: "" })
+    
+    const openEditTimeItemModal = (id: string) => {
+        setIntervalForEdit(e => time.find( (x : ITimeItem) => x.id == id))
+        onOpen()
     }
 
 
     const bgShifter = css({
         content: "",
-        pos : "absolute",
-        left : 0,
+        pos: "absolute",
+        left: 0,
         h: "100%",
         // h: 100,
         pointerEvents: "none",
@@ -62,10 +77,10 @@ const IntervalsList: Component<{ currentTime : number }> = (props) => {
                 <Tbody>
                     <For each={time}>
                         {
-                            (timeItem : ITimeItem) => {
+                            (timeItem: ITimeItem) => {
                                 return (
                                     <Tr
-                                        onClick={() => openModal()}
+                                        onClick={() => openEditTimeItemModal(timeItem.id as string)}
                                         // bg={isCurrentTimedRow(timeItem.id as string)}
                                         pos={"relative"}
                                     >
@@ -74,12 +89,12 @@ const IntervalsList: Component<{ currentTime : number }> = (props) => {
                                             {parseTime(timeItem.time)}
                                         </Td>
                                         <Show when={(timeItem.id === time[currentTimeItem()]?.id)}>
-                                            <Box 
-                                                class={bgShifter()} 
-                                                w={props.currentTime / time[currentTimeItem()]?.time * 100 +"%"}
+                                            <Box
+                                                class={bgShifter()}
+                                                w={props.currentTime / time[currentTimeItem()]?.time * 100 + "%"}
                                             />
                                         </Show>
-                                        
+
 
 
                                         {/* <Box  class={bgShifter()}></Box> */}
@@ -97,6 +112,27 @@ const IntervalsList: Component<{ currentTime : number }> = (props) => {
                     </Tr>
                 </Tfoot> */}
             </Table>
+
+            <Modal opened={isOpen()} onClose={onClose}>
+                <ModalOverlay />
+                <ModalContent>
+                    <ModalCloseButton />
+                    <ModalHeader>Edit Interval</ModalHeader>
+                    <ModalBody>
+                        <FormControl id="label" mb="$4">
+                            <FormLabel>Label</FormLabel>
+                            <Input placeholder="Label" value={intervalForEdit().label} />
+                        </FormControl>
+                        <FormControl id="minutes">
+                            <FormLabel>Minutes</FormLabel>
+                            <Input placeholder="Minutes" value={intervalForEdit().time}/>
+                        </FormControl>
+                    </ModalBody>
+                    <ModalFooter>
+                        <Button onClick={onClose}>Save</Button>
+                    </ModalFooter>
+                </ModalContent>
+            </Modal>
         </Box>
     )
 }

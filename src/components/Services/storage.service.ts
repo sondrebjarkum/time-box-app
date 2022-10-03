@@ -19,15 +19,16 @@
 // };
 
 export const storage = {
-    write : (key : string, val ?: string) => {
-        localStorage.setItem(key, val ? val : key)
+    write : (key : string, val : string) => {
+        localStorage.setItem(key, val)
     },
     get : (key : string) => {
         return localStorage.getItem(key) as string
     },
-    delte : (key : string) => {
+    delete : (key : string) => {
         localStorage.removeItem(key)
     },
-    clear : () => localStorage.clear()
+    clear : () => localStorage.clear(),
+    parse : <T extends object | string>(obj : T) : object | string => typeof(obj) == "object" ? JSON.stringify(obj) :  JSON.parse(obj)
+    
 }
-

@@ -1,7 +1,7 @@
 
-import { Component, createEffect, createMemo, createSignal, onCleanup } from 'solid-js';
+import { Component, createEffect, createMemo, createSignal, onCleanup, onMount } from 'solid-js';
 import { createStore } from "solid-js/store";
-import { Button, Center, Container, Divider, Flex, FormControl, FormLabel, Heading, HStack, IconButton, Input, InputGroup, InputRightAddon, Stack } from '@hope-ui/solid';
+import { Button, Center, Container, Divider, Flex, FormControl, FormLabel, Heading, HStack, IconButton, Input, InputGroup, InputRightAddon, Stack, VStack } from '@hope-ui/solid';
 import IntervalsList from './components/Timer/IntervalsList';
 import { ITimeItem, ITimeItems } from './components/Timer/ITimeItem';
 import ModalManager, { onClose, onOpen } from './components/ModalManager/ModalManager';
@@ -11,9 +11,10 @@ import { useTimer } from './components/Timer/TimeItemsProvider';
 import SidebarMenu, { openSidebarMenu } from './components/Menubar/Menu';
 import { FiPause, FiPlay, FiSettings } from 'solid-icons/fi'
 import { Text } from "@hope-ui/solid"
-import { storage } from './components/Services/files.service';
+import { storage } from './components/Services/storage.service';
 import styles from './index.css'
 import { ImPause2, ImPlay2, ImPlay3, ImStop, ImStop2 } from 'solid-icons/im'
+import { showCustomNotification } from './components/Services/notification.service';
 
 // export const [timeItems, setTimeItems] = createStore<ITimeItem[]>([])
 export const [countdownStarted, setCountdownStarted] = createSignal<boolean>(false)//TODO hent verdi fra localstorage
@@ -30,6 +31,30 @@ const App: Component = () => {
   const handleInputM = (event: any) => setMinutesValue(event.target.value);
   const handleInputL = (event: any) => setLabelValue(event.target.value);
   const [countdownTime, setCountdownTime] = createSignal<number>(0); //sekunder?
+
+  onMount(async () => {
+    const res = storage.parse(storage.get("timerItems")) as Array<any>
+    if(typeof(res) == "string") return
+    showCustomNotification({
+      title: "",
+      description: "",
+      persist: true,
+      action: () => res.map( (e : any) => addTimeItem(e)),
+      render : (
+        
+          <VStack alignItems="flex-start">
+            <Text size="sm" fontWeight="$medium">
+              Saved progress
+            </Text>
+            <Text size="sm" color="$neutral11">
+              Load saved progress from last session?
+            </Text>
+          </VStack>
+          
+      )
+    })
+    
+  });
 
   const clearTimers = () => {
     clear()
@@ -96,23 +121,24 @@ const App: Component = () => {
     setIsValid(e => minutesValue() as number > 0 && labelValue().length > 0)
   })
 
-  const addTimeItem = () => {
+  const addTimeItem = (item ?: ITimeItem) => {
+    console.log("item", item)
     add(
       {
-        id: createUUID(),
-        time: minutesValue() as number,
-        label: labelValue(),
-        alert: false
+        id: item ? item.id : createUUID(),
+        time: item ? item.time / 60 : minutesValue() as number,
+        label: item ? item.label : labelValue(),
       }
     )
     setLabelValue(e => "")
+    !item && storage.write( "timerItems", storage.parse(time) as string )
   }
 
   const stopCountdown = () => {
-    onCleanup
-    setCountdownStarted(e => !e)
+    setCountdownStarted(e => false)
     setCountdownTime( e => 0)
     toggleCurrentTimerItemState()
+    onCleanup
   }
 
   const [time, { add, remove, clear }]: any = useTimer();
@@ -140,9 +166,9 @@ const App: Component = () => {
         <HStack spacing={"$4"}>
           {/* <Button disabled={timeItems.length === 0} onClick={() => toggleTimer()}>{countdownStarted() ? "Stop" : "Start"}</Button>
           <Button disabled={timeItems.length === 0} onClick={() => clearTimers()}>Clear</Button> */}
-          <Button disabled={time.length === 0}                       onClick={() => toggleTimer()}>{countdownStarted() ? <ImPause2 size={20}/> : <ImPlay3 size={20}/>}</Button>
-          <Button disabled={time.length === 0 || countdownStarted()} onClick={() => stopCountdown()}><ImStop2 size={20}/></Button>
-          <Button disabled={time.length === 0 || countdownStarted()} onClick={() => clearTimers()} ml={"auto"}>Clear</Button>
+          <Button colorScheme={countdownStarted() ? "warning" : "success"} disabled={time.length === 0}  onClick={() => toggleTimer()}>{countdownStarted() ? <ImPause2 size={20}/> : <ImPlay3 size={20}/>}</Button>
+          <Button colorScheme={"danger"} disabled={time.length === 0 || countdownStarted()}   onClick={() => stopCountdown()}><ImStop2 size={20}/></Button>
+          <Button colorScheme={"neutral"} disabled={time.length === 0 || countdownStarted()}    onClick={() => clearTimers()} ml={"auto"}>Clear</Button>
         </HStack>
 
         <Divider mt="$4" mb="$4" />
@@ -153,7 +179,7 @@ const App: Component = () => {
             <Input id="Label" type="text" value={labelValue()} onInput={handleInputL} placeholder="Label" />
           </FormControl>
           <FormControl>
-            <FormLabel for="Time">Time</FormLabel>
+            <FormLabel for="Time">Minutes</FormLabel>
             <InputGroup>
               <Input id="Time" type="number" value={minutesValue()} onInput={handleInputM} placeholder="Minutes" />
               <InputRightAddon>min</InputRightAddon>

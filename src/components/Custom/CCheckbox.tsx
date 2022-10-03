@@ -2,7 +2,7 @@ import { Center, CheckboxGroup, CheckboxPrimitive, CheckboxPrimitiveIndicator, c
 import { Component, createEffect, createSignal, For, onMount } from "solid-js";
 import { Text } from "@hope-ui/solid"
 import { FiCheck } from 'solid-icons/fi'
-import { storage } from "../Services/files.service";
+import { storage } from "../Services/storage.service";
 import { setInterval } from "timers/promises";
 
 interface Interface {
@@ -57,10 +57,7 @@ export default function CCheckbox(props : Interface) {
         setInternalState(a => !a)
         props.callback(e.target.checked as boolean)
     }
-    createEffect( () =>{
-        console.log("toggle", props.initValue)
-        console.log("internalstate", internalState())
-    })
+
     return (
             <VStack spacing="$4">
                 <CheckboxPrimitive
