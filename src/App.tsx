@@ -1,13 +1,19 @@
-import { Component, createEffect, createMemo, createSignal, For, onCleanup } from 'solid-js';
+
+import { Component, createEffect, createMemo, createSignal, onCleanup } from 'solid-js';
 import { createStore } from "solid-js/store";
-import { Button, Center, Container, createDisclosure, Flex, FormControl, FormHelperText, FormLabel, Heading, HStack, IconButton, Input, InputGroup, InputRightAddon, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, Stack } from '@hope-ui/solid';
+import { Button, Center, Container, Divider, Flex, FormControl, FormLabel, Heading, HStack, IconButton, Input, InputGroup, InputRightAddon, Stack } from '@hope-ui/solid';
 import IntervalsList from './components/Timer/IntervalsList';
 import { ITimeItem, ITimeItems } from './components/Timer/ITimeItem';
 import ModalManager, { onClose, onOpen } from './components/ModalManager/ModalManager';
 import { createUUID } from './components/Services/uuid.service';
-import { parseMinutes, parseTime } from './components/Services/timer.service';
+import { parseMinutes, parseTime, playAlert } from './components/Services/timer.service';
 import { useTimer } from './components/Timer/TimeItemsProvider';
 import SidebarMenu, { openSidebarMenu } from './components/Menubar/Menu';
+import { FiPause, FiPlay, FiSettings } from 'solid-icons/fi'
+import { Text } from "@hope-ui/solid"
+import { storage } from './components/Services/files.service';
+import styles from './index.css'
+import { ImPause2, ImPlay2, ImPlay3, ImStop, ImStop2 } from 'solid-icons/im'
 
 // export const [timeItems, setTimeItems] = createStore<ITimeItem[]>([])
 export const [countdownStarted, setCountdownStarted] = createSignal<boolean>(false)//TODO hent verdi fra localstorage
@@ -23,7 +29,7 @@ const App: Component = () => {
   const [isValid, setIsValid] = createSignal<boolean>()
   const handleInputM = (event: any) => setMinutesValue(event.target.value);
   const handleInputL = (event: any) => setLabelValue(event.target.value);
-  const [countdownTime, setCountdownTime] = createSignal<number>(0);
+  const [countdownTime, setCountdownTime] = createSignal<number>(0); //sekunder?
 
   const clearTimers = () => {
     clear()
@@ -35,7 +41,6 @@ const App: Component = () => {
   });
 
   const startTimer = () => {
-    // setCountdownTime(e => e = timeItems[currentTimeItem()].time)
     if(currentTimeItem() < 0) toggleCurrentTimerItemState()
     setCountdownTime(e => e = time[currentTimeItem()].time)
   }
@@ -43,7 +48,11 @@ const App: Component = () => {
   const toggleCurrentTimerItemState = () => setCurrentTimeItem( e => e < 0 ? 0 : -1 )
 
   const interval = setInterval(() => {
-    if (countdownStarted()) setCountdownTime(e => e - 10) //TODO -1
+    if (countdownStarted()) setCountdownTime(e => e - 1)
+
+    if(countdownTime() == parseInt(storage.get("alertTiming"), 10) && countdownStarted()){
+      playAlert( storage.get("alert") + ".mp3" )
+    }
 
     if (countdownTime() === 0 && countdownStarted()) {
       clearTimer()
@@ -57,6 +66,9 @@ const App: Component = () => {
     trudgeTimeItems()
 
     if (countdownStarted()) {
+      if(currentTimeItem() !== 0 && storage.get("alertOn") === "y"){ 
+        playAlert( storage.get("alert") + ".mp3" )
+      }
       startTimer()
     }
   })
@@ -107,29 +119,33 @@ const App: Component = () => {
 
   return (
     <>
-      <Flex bg={"$blackAlpha7"} p={"$4"} w={"100%"} justifyContent={"space-between"}>
-        <p>TimeBoxr</p>
-        <IconButton aria-label="Search" icon={"?"} onClick={() => openSidebarMenu()}/>
+      <SidebarMenu/>
+
+      <Flex  m={0} w={"100%"} justifyContent={"center"}>
+        <Flex bg={"$blackAlpha7"} p={"$4"} w={"100%"} justifyContent={"space-between"}>
+          <Center>
+            <Text>TimeBoxr</Text>
+          </Center>
+          <IconButton aria-label="Settings" icon={<FiSettings />} onClick={() => openSidebarMenu()}/>
+        </Flex>
       </Flex>
-      <Container>
-        <Button onclick={() => add({ id: createUUID(), time: 100, label: "asdsad" })}>Add</Button>
-        <Button onclick={() => clear()}>Clear</Button>
-        <Button onclick={() => remove(time[0].id)}>Remove</Button>
 
-      </Container>
-
-      <Container maxW={1000}>
+      <Container maxW={1000} p="$4">
         <Center>
           <Heading size="9xl">{currentTimeString()}</Heading>
         </Center>
 
+        <Divider mt="$4" mb="$4" />
+
         <HStack spacing={"$4"}>
           {/* <Button disabled={timeItems.length === 0} onClick={() => toggleTimer()}>{countdownStarted() ? "Stop" : "Start"}</Button>
           <Button disabled={timeItems.length === 0} onClick={() => clearTimers()}>Clear</Button> */}
-          <Button disabled={time.length === 0}                       onClick={() => toggleTimer()}>{countdownStarted() ? "⏸︎" : "⏵︎"}</Button>
-          <Button disabled={time.length === 0 || countdownStarted()} onClick={() => stopCountdown()}>⏹︎</Button>
-          <Button disabled={time.length === 0 || countdownStarted()} onClick={() => clearTimers()}>Clear</Button>
+          <Button disabled={time.length === 0}                       onClick={() => toggleTimer()}>{countdownStarted() ? <ImPause2 size={20}/> : <ImPlay3 size={20}/>}</Button>
+          <Button disabled={time.length === 0 || countdownStarted()} onClick={() => stopCountdown()}><ImStop2 size={20}/></Button>
+          <Button disabled={time.length === 0 || countdownStarted()} onClick={() => clearTimers()} ml={"auto"}>Clear</Button>
         </HStack>
+
+        <Divider mt="$4" mb="$4" />
 
         <Stack spacing={"$4"}>
           <FormControl>
@@ -142,37 +158,20 @@ const App: Component = () => {
               <Input id="Time" type="number" value={minutesValue()} onInput={handleInputM} placeholder="Minutes" />
               <InputRightAddon>min</InputRightAddon>
             </InputGroup>
-
           </FormControl>
           <HStack justifyContent="flex-end" alignItems="flex-end">
             <Button type="submit" onClick={() => addTimeItem()} disabled={!isValid()}>Add</Button>
           </HStack>
         </Stack>
-        <div>
-          <IntervalsList></IntervalsList>
-        </div>
+
+
+        <IntervalsList currentTime={countdownTime()} />
+
 
       </Container>
 
-      <SidebarMenu></SidebarMenu>
     </>
   );
 };
 
 export default App;
-
-  // const [newTimerItemValue, setNewTimerItemValue] = createSignal("00:00:00")
-  // const handleInput = (event : any) => parseInputTime(event.target.value);
-  // const newTimerItemValueParsed = () => parseInputTime(newTimerItemValue())
-  // const parseInputTime = (input : any) => {
-  //   console.log("yay")
-
-  //   return input
-  // }
-
-  // interface TimeItemsState {
-//   timeItems: ITimeItem[]
-//   addTimeItem?: (item : ITimeItem) => void
-//   removeTimeItem?: (id: string) => void
-//   editTimeItem?: (id: string) => void
-// }

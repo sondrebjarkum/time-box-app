@@ -10,6 +10,7 @@
   },
   "license": "MIT",
   "devDependencies": {
+    "@types/node": "^18.7.23",
     "@types/uuid": "^8.3.4",
     "typescript": "^4.8.2",
     "uuid": "^9.0.0",
@@ -19,6 +20,7 @@
   "dependencies": {
     "@hope-ui/solid": "^0.6.7",
     "@stitches/core": "^1.2.8",
+    "solid-icons": "^1.0.1",
     "solid-js": "^1.5.1",
     "solid-transition-group": "^0.0.10"
   }
