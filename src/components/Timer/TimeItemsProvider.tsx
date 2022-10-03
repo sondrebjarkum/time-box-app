@@ -26,11 +26,11 @@ export function TimerProvider(props: any) {
                 clear() {
                     setTime(() => [])
                 },
-                edit(label : string, time : number, id : string) {
-                    // console.log(id, time, label)
+                edit(item : any) {
+                    console.log("item", item)
                     setTime(
-                        (e) => e.id === id,
-                        produce( (e) => (e.label = label, e.time = time) ),
+                        (e) => e.id === item.id,
+                        produce( (e) => (e.label = item.label, e.time = item.time) ),
                     )
                 },
                 getTotalTime() {

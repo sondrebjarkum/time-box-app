@@ -34,6 +34,8 @@ import { useTimer } from './TimeItemsProvider';
 import { countdownStarted, currentTimeItem, isPaused } from '../../App';
 import { FiArrowDown, FiArrowUp, FiEdit, FiMoreVertical } from 'solid-icons/fi';
 import { showNotification } from '../Services/notification.service';
+import { createStore } from 'solid-js/store';
+import { storage } from '../Services/storage.service';
 
 
 const IntervalsList: Component<{ currentTime: number }> = (props) => {
@@ -45,47 +47,46 @@ const IntervalsList: Component<{ currentTime: number }> = (props) => {
         (id === time[currentTimeItem()]?.id) ?
             countdownStarted() ? gradient() : isPaused() ? "$neutral5" : "$default" : "$default"
 
-    const [intervalForEdit, setIntervalForEdit] = createSignal<ITimeItem>({ id: "", time: 0, label: "" })
+    const [intervalForEdit, setIntervalForEdit] = createStore<ITimeItem>({ id: "", time: 0, label: "" })
 
     const openEditTimeItemModal = (id: string) => {
-        console.log("id", id)
         const item = time.find((x: ITimeItem) => x.id == id)
-        console.log("time item",item)
-        const mdadd = {id: item.id, label: item.label, time: item.time}
-        setIntervalForEdit(e => mdadd)
+        const obj = {id: item.id, label: item.label, time: item.time}
+        setIntervalForEdit(e => obj)
         onOpen()
     }
 
-    const shiftItem = (id: string, direction: string) => {
+    const shiftItem = (id: string, direction: "up" | "down") => {
         reArrange(id, direction)
     }
 
     const saveInterval = () => {
         try{
-            edit(intervalForEdit().label, intervalForEdit().time, intervalForEdit().id)
+            edit(intervalForEdit)
         }catch(e){
             showNotification({
-                title: "failure",
-                description: "Editing interval failed",
+                title: "Failure",
+                description: "Saving interval failed",
                 status : "danger"
             })
             return
         }
         showNotification({
             title: "Success",
-            description: "Edits to interval saved",
+            description: "Edits to interval saved!",
             status: "success"
         })
+        storage.write( "timerItems", storage.parse(time) as string )
         onClose()
     }
 
     const deleteInterval = () => {
         try{
-            remove(intervalForEdit().id)
+            remove(intervalForEdit.id)
         }catch(e){
             showNotification({
                 title: "failure",
-                description: "Editing interval failed",
+                description: "Deleting interval failed",
                 status : "danger"
             })
             return
@@ -95,6 +96,7 @@ const IntervalsList: Component<{ currentTime: number }> = (props) => {
             description: "Interval deleted",
             status: "success"
         })
+        storage.write( "timerItems", storage.parse(time) as string )
         onClose()
     }
 
@@ -111,9 +113,6 @@ const IntervalsList: Component<{ currentTime: number }> = (props) => {
     });
     const gradient = () => `linear-gradient(90deg, rgba(2,0,36,1) ${props.currentTime / time[currentTimeItem()]?.time * 100}%, rgba(0,212,255,0) ${props.currentTime / time[currentTimeItem()]?.time * 100}%)`
 
-    createEffect( () => {
-        console.log(intervalForEdit())
-    })
     return (
         <Box>
             <Table >
@@ -206,11 +205,11 @@ const IntervalsList: Component<{ currentTime: number }> = (props) => {
                     <ModalBody>
                         <FormControl id="label" mb="$4">
                             <FormLabel>Label</FormLabel>
-                            <Input placeholder="Label" value={intervalForEdit().label} onChange={(e : any) => setIntervalForEdit(x => x.label = e.target.value)} />
+                            <Input placeholder="Label" value={intervalForEdit.label} onChange={(e : any) => setIntervalForEdit("label", e.target.value)} />
                         </FormControl>
                         <FormControl id="minutes">
                             <FormLabel>Minutes</FormLabel>
-                            <Input placeholder="Minutes" value={intervalForEdit().time} onChange={(e : any) => setIntervalForEdit(x => x.time = e.target.value)} />
+                            <Input placeholder="Minutes" value={intervalForEdit.time / 60} onChange={(e : any) => setIntervalForEdit("time", e.target.value * 60)} />
                         </FormControl>
                     </ModalBody>
                     <ModalFooter gap={"$4"}>
