@@ -75,8 +75,8 @@ const App: Component = () => {
   const interval = setInterval(() => {
     if (countdownStarted()) setCountdownTime(e => e - 1)
 
-    if(countdownTime() == parseInt(storage.get("alertTiming"), 10) && countdownStarted()){
-      playAlert( storage.get("alert") + ".mp3" )
+    if(countdownTime() == parseInt(storage.get("alertTiming"), 10) && countdownStarted() && storage.get("alertTiming") != "0" && storage.get("alertOn") === "y" ){
+      playAlert( storage.get("alertAhead") + ".mp3" )
     }
 
     if (countdownTime() === 0 && countdownStarted()) {
@@ -91,7 +91,7 @@ const App: Component = () => {
     trudgeTimeItems()
 
     if (countdownStarted()) {
-      if(currentTimeItem() !== 0 && storage.get("alertOn") === "y"){ 
+      if( (currentTimeItem() !== 0 && storage.get("alertOn") === "y") ){ 
         playAlert( storage.get("alert") + ".mp3" )
       }
       startTimer()

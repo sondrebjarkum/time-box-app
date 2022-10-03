@@ -46,6 +46,7 @@ export const openSidebarMenu = onOpen
 
 const SidebarMenu: Component = () => {
     const [selectedAlert, setSelectedAlert] = createSignal(storage.get("alert") || "default")
+    const [selectedAlertAhead, setSelectedAlertAhead] = createSignal(storage.get("alertAhead") || "default")
     const [toggleAlert, setToggleAlert] = createSignal<boolean>(storage.get("alertOn") === "y")
     const [alertTiming, setAlertTiming] = createSignal<number>(parseInt(storage.get("alertTiming")) || 0)
     const [alertVolume, setAlertVolume] = createSignal<IProperties["volume"]>(storage.get("alertVolume") as IProperties["volume"] || "100")
@@ -53,6 +54,11 @@ const SidebarMenu: Component = () => {
 
     const setSelectedAlarmHandler = (alarm: any) => {
         setSelectedAlert(e => alarm)
+        playAlert(alarm + ".mp3")
+        return alarm
+    }
+    const setSelectedAlarmAheadHandler = (alarm: any) => {
+        setSelectedAlertAhead(e => alarm)
         playAlert(alarm + ".mp3")
         return alarm
     }
@@ -77,6 +83,7 @@ const SidebarMenu: Component = () => {
             storage.write("alertOn", toggleAlert() ? "y" : "n")
             storage.write("alertTiming", String(alertTiming()))
             storage.write("alertVolume", alertVolume())
+            storage.write("alertAhead", selectedAlertAhead())
 
         } catch (e) {
             showNotification({ title: "Failed to save", description: "Failed to save settings... 😓", status: "danger" })
@@ -103,7 +110,7 @@ const SidebarMenu: Component = () => {
                             <TabList>
                                 <Tab>Alerts</Tab>
                                 <Tab>Storage</Tab>
-                                <Tab>????</Tab>
+                                {/* <Tab>????</Tab> */}
                             </TabList>
                             <TabPanel>
                                 {/* ALERTS */}
@@ -170,12 +177,14 @@ const SidebarMenu: Component = () => {
                                         </VStack>
                                     </FormControl>
 
+                                    <Divider />
+
                                     {/* Toggle alert x-seconds before */}
                                     <FormControl>
                                         <VStack alignItems={"stretch"}>
                                             <FormLabel for="alertbefore">Alert me ahead of time!</FormLabel>
                                             <HStack gap={"$4"} >
-                                                <Text>0s</Text>
+                                                <Text>off</Text>
                                                 <input
                                                     type="range"
                                                     min="0"
@@ -189,6 +198,30 @@ const SidebarMenu: Component = () => {
                                             </HStack>
                                         </VStack>
                                         <FormHelperText>How many seconds before the next interval an alert should play</FormHelperText>
+                                    </FormControl>
+
+                                    {/* Alert ahead sound */}
+                                    <FormControl>
+                                        <FormLabel for="alert">Alert ahead sound</FormLabel>
+                                        <Select defaultValue="Solid" value={selectedAlertAhead()} onChange={setSelectedAlarmAheadHandler}>
+                                            <SelectTrigger>
+                                                <SelectPlaceholder>Choose alarm sound</SelectPlaceholder>
+                                                <SelectValue />
+                                                <SelectIcon />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectListbox>
+                                                    <For each={listAlarmFileNames}>
+                                                        {item => (
+                                                            <SelectOption value={item} >
+                                                                <SelectOptionText >{item}</SelectOptionText>
+                                                                <SelectOptionIndicator />
+                                                            </SelectOption>
+                                                        )}
+                                                    </For>
+                                                </SelectListbox>
+                                            </SelectContent>
+                                        </Select>
                                     </FormControl>
 
                                     <Divider />
@@ -207,9 +240,9 @@ const SidebarMenu: Component = () => {
                             </TabPanel>
 
 
-                            <TabPanel>
+                            {/* <TabPanel>
                                 <p>Oh, hello there.</p>
-                            </TabPanel>
+                            </TabPanel> */}
 
 
                         </Tabs>
