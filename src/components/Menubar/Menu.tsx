@@ -110,7 +110,7 @@ const SidebarMenu: Component = () => {
                             <TabList>
                                 <Tab>Alerts</Tab>
                                 <Tab>Storage</Tab>
-                                {/* <Tab>????</Tab> */}
+                                <Tab>Other</Tab>
                             </TabList>
                             <TabPanel>
                                 {/* ALERTS */}
@@ -240,9 +240,9 @@ const SidebarMenu: Component = () => {
                             </TabPanel>
 
 
-                            {/* <TabPanel>
-                                <p>Oh, hello there.</p>
-                            </TabPanel> */}
+                            <TabPanel>
+                                <Switch defaultChecked>Eastereggs</Switch>
+                            </TabPanel>
 
 
                         </Tabs>

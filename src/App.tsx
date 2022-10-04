@@ -1,7 +1,7 @@
 
-import { Component, createEffect, createMemo, createSignal, onCleanup, onMount } from 'solid-js';
+import { Component, createEffect, createMemo, createSignal, onCleanup, onMount, Show } from 'solid-js';
 import { createStore } from "solid-js/store";
-import { Button, Center, Container, Divider, Flex, FormControl, FormLabel, Heading, HStack, IconButton, Input, InputGroup, InputRightAddon, Stack, VStack } from '@hope-ui/solid';
+import { Button, Center, Container, Divider, Flex, FormControl, FormLabel, Heading, HStack, IconButton, Image, Input, InputGroup, InputRightAddon, Stack, VStack } from '@hope-ui/solid';
 import IntervalsList from './components/Timer/IntervalsList';
 import { ITimeItem, ITimeItems } from './components/Timer/ITimeItem';
 import ModalManager, { onClose, onOpen } from './components/ModalManager/ModalManager';
@@ -20,7 +20,7 @@ import { showCustomNotification } from './components/Services/notification.servi
 export const [countdownStarted, setCountdownStarted] = createSignal<boolean>(false)//TODO hent verdi fra localstorage
 export const [currentTimeItem, setCurrentTimeItem] = createSignal<number>(-1);
 // const [countdownPaused, setCountdownPaused] = createSignal<boolean>(false)
-export const isPaused = () => (!countdownStarted() && currentTimeItem() !== -1 )
+export const isPaused = () => (!countdownStarted() && currentTimeItem() !== -1)
 
 
 const App: Component = () => {
@@ -34,49 +34,49 @@ const App: Component = () => {
 
   onMount(async () => {
     const res = storage.parse(storage.get("timerItems")) as Array<any>
-    if(typeof(res) == "string") return
+    if (typeof (res) == "string") return
     showCustomNotification({
       title: "",
       description: "",
       persist: true,
-      action: () => res.map( (e : any) => addTimeItem(e)),
-      render : (
-        
-          <VStack alignItems="flex-start">
-            <Text size="sm" fontWeight="$medium">
-              Saved progress
-            </Text>
-            <Text size="sm" color="$neutral11">
-              Load saved progress from last session?
-            </Text>
-          </VStack>
-          
+      action: () => res.map((e: any) => addTimeItem(e)),
+      render: (
+
+        <VStack alignItems="flex-start">
+          <Text size="sm" fontWeight="$medium">
+            Saved progress
+          </Text>
+          <Text size="sm" color="$neutral11">
+            Load saved progress from last session?
+          </Text>
+        </VStack>
+
       )
     })
-    
+
   });
 
   const clearTimers = () => {
     clear()
     setCurrentTimeItem(e => 0)
-    setCountdownTime( e => 0)
+    setCountdownTime(e => 0)
   }
   const currentTimeString = createMemo(() => {
     return parseTime(countdownTime());
   });
 
   const startTimer = () => {
-    if(currentTimeItem() < 0) toggleCurrentTimerItemState()
+    if (currentTimeItem() < 0) toggleCurrentTimerItemState()
     setCountdownTime(e => e = time[currentTimeItem()].time)
   }
 
-  const toggleCurrentTimerItemState = () => setCurrentTimeItem( e => e < 0 ? 0 : -1 )
+  const toggleCurrentTimerItemState = () => setCurrentTimeItem(e => e < 0 ? 0 : -1)
 
   const interval = setInterval(() => {
     if (countdownStarted()) setCountdownTime(e => e - 1)
 
-    if(countdownTime() == parseInt(storage.get("alertTiming"), 10) && countdownStarted() && storage.get("alertTiming") != "0" && storage.get("alertOn") === "y" ){
-      playAlert( storage.get("alertAhead") + ".mp3" )
+    if (countdownTime() == parseInt(storage.get("alertTiming"), 10) && countdownStarted() && storage.get("alertTiming") != "0" && storage.get("alertOn") === "y") {
+      playAlert(storage.get("alertAhead") + ".mp3")
     }
 
     if (countdownTime() === 0 && countdownStarted()) {
@@ -91,8 +91,8 @@ const App: Component = () => {
     trudgeTimeItems()
 
     if (countdownStarted()) {
-      if( (currentTimeItem() !== 0 && storage.get("alertOn") === "y") ){ 
-        playAlert( storage.get("alert") + ".mp3" )
+      if ((currentTimeItem() !== 0 && storage.get("alertOn") === "y")) {
+        playAlert(storage.get("alert") + ".mp3")
       }
       startTimer()
     }
@@ -121,7 +121,7 @@ const App: Component = () => {
     setIsValid(e => minutesValue() as number > 0 && labelValue().length > 0)
   })
 
-  const addTimeItem = (item ?: ITimeItem) => {
+  const addTimeItem = (item?: ITimeItem) => {
     console.log("item", item)
     add(
       {
@@ -131,12 +131,12 @@ const App: Component = () => {
       }
     )
     setLabelValue(e => "")
-    !item && storage.write( "timerItems", storage.parse(time) as string )
+    !item && storage.write("timerItems", storage.parse(time) as string)
   }
 
   const stopCountdown = () => {
     setCountdownStarted(e => false)
-    setCountdownTime( e => 0)
+    setCountdownTime(e => 0)
     toggleCurrentTimerItemState()
     onCleanup
   }
@@ -145,14 +145,14 @@ const App: Component = () => {
 
   return (
     <>
-      <SidebarMenu/>
+      <SidebarMenu />
 
-      <Flex  m={0} w={"100%"} justifyContent={"center"}>
+      <Flex m={0} w={"100%"} justifyContent={"center"}>
         <Flex bg={"$blackAlpha7"} p={"$4"} w={"100%"} justifyContent={"space-between"}>
           <Center>
             <Text>TimeBoxr</Text>
           </Center>
-          <IconButton aria-label="Settings" icon={<FiSettings />} onClick={() => openSidebarMenu()}/>
+          <IconButton aria-label="Settings" icon={<FiSettings />} onClick={() => openSidebarMenu()} />
         </Flex>
       </Flex>
 
@@ -164,11 +164,21 @@ const App: Component = () => {
         <Divider mt="$4" mb="$4" />
 
         <HStack spacing={"$4"}>
-          {/* <Button disabled={timeItems.length === 0} onClick={() => toggleTimer()}>{countdownStarted() ? "Stop" : "Start"}</Button>
-          <Button disabled={timeItems.length === 0} onClick={() => clearTimers()}>Clear</Button> */}
-          <Button colorScheme={countdownStarted() ? "warning" : "success"} disabled={time.length === 0}  onClick={() => toggleTimer()}>{countdownStarted() ? <ImPause2 size={20}/> : <ImPlay3 size={20}/>}</Button>
-          <Button colorScheme={"danger"} disabled={time.length === 0 || countdownStarted()}   onClick={() => stopCountdown()}><ImStop2 size={20}/></Button>
-          <Button colorScheme={"neutral"} disabled={time.length === 0 || countdownStarted()}    onClick={() => clearTimers()} ml={"auto"}>Clear</Button>
+          <Show when={countdownStarted()}>
+            <Image
+              boxSize="60px"
+              src="./fox.gif"
+              alt="Monkey D. Luffy"
+              objectFit="cover"
+              position={"absolute"}
+              right={"25%"}
+              top={166}
+            />
+          </Show>
+
+          <Button colorScheme={countdownStarted() ? "warning" : "success"} disabled={time.length === 0} onClick={() => toggleTimer()}>{countdownStarted() ? <ImPause2 size={20} /> : <ImPlay3 size={20} />}</Button>
+          <Button colorScheme={"danger"} disabled={time.length === 0 || countdownStarted()} onClick={() => stopCountdown()}><ImStop2 size={20} /></Button>
+          <Button colorScheme={"neutral"} disabled={time.length === 0 || countdownStarted()} onClick={() => clearTimers()} ml={"auto"}>Clear</Button>
         </HStack>
 
         <Divider mt="$4" mb="$4" />
