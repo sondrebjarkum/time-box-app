@@ -1,0 +1,9 @@
+{
+    "name" : "TimeBoxr",
+    "start_url" : "/",
+    "icons" : [],
+    "theme_color": "#000",
+    "background_color" : "#fff",
+    "display" : "fullscreen",
+    "orientation" : "portrait"
+}

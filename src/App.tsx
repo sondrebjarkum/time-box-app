@@ -1,7 +1,7 @@
 
 import { Component, createEffect, createMemo, createSignal, onCleanup, onMount } from 'solid-js';
 import { createStore } from "solid-js/store";
-import { Button, Center, Container, Divider, Flex, FormControl, FormLabel, Heading, HStack, IconButton, Input, InputGroup, InputRightAddon, Stack, VStack } from '@hope-ui/solid';
+import { Button, Center, Container, css, Divider, Flex, FormControl, FormLabel, Heading, HStack, IconButton, Input, InputGroup, InputRightAddon, Spacer, Stack, VStack } from '@hope-ui/solid';
 import IntervalsList from './components/Timer/IntervalsList';
 import { ITimeItem, ITimeItems } from './components/Timer/ITimeItem';
 import ModalManager, { onClose, onOpen } from './components/ModalManager/ModalManager';
@@ -22,6 +22,12 @@ export const [currentTimeItem, setCurrentTimeItem] = createSignal<number>(-1);
 // const [countdownPaused, setCountdownPaused] = createSignal<boolean>(false)
 export const isPaused = () => (!countdownStarted() && currentTimeItem() !== -1 )
 
+const container = css({
+  rounded: "$md",
+  border: "1px solid $neutral7",
+  p: "$4"
+
+});
 
 const App: Component = () => {
 
@@ -156,14 +162,14 @@ const App: Component = () => {
         </Flex>
       </Flex>
 
-      <Container maxW={1000} p="$4">
+      <Container maxW={1000} p="$4" >
         <Center>
           <Heading size="9xl">{currentTimeString()}</Heading>
         </Center>
 
         <Divider mt="$4" mb="$4" />
 
-        <HStack spacing={"$4"}>
+        <HStack spacing={"$4"} mb="$4">
           {/* <Button disabled={timeItems.length === 0} onClick={() => toggleTimer()}>{countdownStarted() ? "Stop" : "Start"}</Button>
           <Button disabled={timeItems.length === 0} onClick={() => clearTimers()}>Clear</Button> */}
           <Button colorScheme={countdownStarted() ? "warning" : "success"} disabled={time.length === 0}  onClick={() => toggleTimer()}>{countdownStarted() ? <ImPause2 size={20}/> : <ImPlay3 size={20}/>}</Button>
@@ -171,27 +177,30 @@ const App: Component = () => {
           <Button colorScheme={"neutral"} disabled={time.length === 0 || countdownStarted()}    onClick={() => clearTimers()} ml={"auto"}>Clear</Button>
         </HStack>
 
-        <Divider mt="$4" mb="$4" />
+        <Container class={container()}>
+          <Stack spacing={"$4"}>
+            <FormControl>
+              <FormLabel for="Label">Label</FormLabel>
+              <Input id="Label" type="text" value={labelValue()} onInput={handleInputL} placeholder="Label" />
+            </FormControl>
+            <FormControl>
+              <FormLabel for="Time">Minutes</FormLabel>
+              <InputGroup>
+                <Input id="Time" type="number" value={minutesValue()} onInput={handleInputM} placeholder="Minutes" />
+                <InputRightAddon>min</InputRightAddon>
+              </InputGroup>
+            </FormControl>
+            <HStack justifyContent="flex-end" alignItems="flex-end">
+              <Button type="submit" onClick={() => addTimeItem()} disabled={!isValid()}>Add</Button>
+            </HStack>
+          </Stack>
+          
+          <Spacer m={"$4"} />
+          <Divider></Divider>
 
-        <Stack spacing={"$4"}>
-          <FormControl>
-            <FormLabel for="Label">Label</FormLabel>
-            <Input id="Label" type="text" value={labelValue()} onInput={handleInputL} placeholder="Label" />
-          </FormControl>
-          <FormControl>
-            <FormLabel for="Time">Minutes</FormLabel>
-            <InputGroup>
-              <Input id="Time" type="number" value={minutesValue()} onInput={handleInputM} placeholder="Minutes" />
-              <InputRightAddon>min</InputRightAddon>
-            </InputGroup>
-          </FormControl>
-          <HStack justifyContent="flex-end" alignItems="flex-end">
-            <Button type="submit" onClick={() => addTimeItem()} disabled={!isValid()}>Add</Button>
-          </HStack>
-        </Stack>
+          <IntervalsList currentTime={countdownTime()} />
+        </Container>
 
-
-        <IntervalsList currentTime={countdownTime()} />
 
 
       </Container>

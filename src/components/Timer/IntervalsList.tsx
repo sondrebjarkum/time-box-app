@@ -121,7 +121,7 @@ const IntervalsList: Component<{ currentTime: number }> = (props) => {
                     <Tr>
                         <Th>Label</Th>
                         <Th numeric>Time</Th>
-                        <Th w={50}></Th>
+                        <Th w={112}></Th>
 
                     </Tr>
                 </Thead>
