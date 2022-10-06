@@ -1,8 +1,20 @@
-import { createSignal, createContext, useContext } from "solid-js";
+import { createContext, useContext } from "solid-js";
 import { createStore, produce } from "solid-js/store";
 import { parseTime } from "../Services/timer.service";
-import { createUUID } from "../Services/uuid.service";
-import { ITimeItem } from "./ITimeItem";
+
+/**
+ * Interface for a timed interval item
+ *
+ * @time {number} Item time in seconds
+ * @label {string} Item name to be displayed
+ * @alert {boolean} Whether to play a sound when timed out
+ */
+export interface ITimeItem{
+    id?: string,
+    time: number,
+    label: string,
+}
+
 
 const TimerContext = createContext();
 

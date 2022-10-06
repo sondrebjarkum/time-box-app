@@ -3,7 +3,6 @@ import {
     Text,
     Button,
     createDisclosure,
-    css,
     Divider,
     Drawer,
     DrawerBody,
@@ -16,9 +15,6 @@ import {
     FormHelperText,
     FormLabel,
     HStack,
-    IconButton,
-    Input,
-    notificationService,
     Select,
     SelectContent,
     SelectIcon,
@@ -29,14 +25,13 @@ import {
     SelectPlaceholder,
     SelectTrigger,
     SelectValue,
-    Switch,
     Tab,
     TabList,
     TabPanel,
     Tabs,
     VStack,
 } from "@hope-ui/solid"
-import { IProperties, listAlarmFileNames, playAlert } from '../Services/timer.service';
+import { IAlarmProperties, listAlarmFileNames, playAlert } from '../Services/timer.service';
 import { showNotification } from '../Services/notification.service';
 import { storage } from '../Services/storage.service';
 import CCheckbox from '../Custom/CCheckbox';
@@ -49,7 +44,7 @@ const SidebarMenu: Component = () => {
     const [selectedAlertAhead, setSelectedAlertAhead] = createSignal(storage.get("alertAhead") || "default")
     const [toggleAlert, setToggleAlert] = createSignal<boolean>(storage.get("alertOn") === "y")
     const [alertTiming, setAlertTiming] = createSignal<number>(parseInt(storage.get("alertTiming")) || 0)
-    const [alertVolume, setAlertVolume] = createSignal<IProperties["volume"]>(storage.get("alertVolume") as IProperties["volume"] || "100")
+    const [alertVolume, setAlertVolume] = createSignal<IAlarmProperties["volume"]>(storage.get("alertVolume") as IAlarmProperties["volume"] || "100")
 
 
     const setSelectedAlarmHandler = (alarm: any) => {

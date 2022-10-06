@@ -1,9 +1,7 @@
-import { Center, CheckboxGroup, CheckboxPrimitive, CheckboxPrimitiveIndicator, css, HStack, VStack } from "@hope-ui/solid";
-import { Component, createEffect, createSignal, For, onMount } from "solid-js";
+import { Center, CheckboxPrimitive, CheckboxPrimitiveIndicator, css, HStack, VStack } from "@hope-ui/solid";
+import { createSignal} from "solid-js";
 import { Text } from "@hope-ui/solid"
 import { FiCheck } from 'solid-icons/fi'
-import { storage } from "../Services/storage.service";
-import { setInterval } from "timers/promises";
 
 interface Interface {
     name: string,

@@ -1,20 +1,18 @@
 
 import { Component, createEffect, createMemo, createSignal, onCleanup, onMount } from 'solid-js';
-import { createStore } from "solid-js/store";
 import { Button, Center, Container, css, Divider, Flex, FormControl, FormLabel, Heading, HStack, IconButton, Input, InputGroup, InputRightAddon, Spacer, Stack, VStack } from '@hope-ui/solid';
 import IntervalsList from './components/Timer/IntervalsList';
-import { ITimeItem, ITimeItems } from './components/Timer/ITimeItem';
-import ModalManager, { onClose, onOpen } from './components/ModalManager/ModalManager';
+import { ITimeItem } from './components/Timer/TimeItemsProvider';
 import { createUUID } from './components/Services/uuid.service';
 import { parseTime, playAlert } from './components/Services/timer.service';
 import { useTimer } from './components/Timer/TimeItemsProvider';
 import SidebarMenu, { openSidebarMenu } from './components/Menubar/Menu';
-import { FiPause, FiPlay, FiSettings } from 'solid-icons/fi'
+import {FiSettings } from 'solid-icons/fi'
 import { Text } from "@hope-ui/solid"
 import { storage } from './components/Services/storage.service';
-import styles from './index.css'
-import { ImPause2, ImPlay2, ImPlay3, ImStop, ImStop2 } from 'solid-icons/im'
+import { ImPause2, ImPlay3, ImStop2 } from 'solid-icons/im'
 import { showCustomNotification } from './components/Services/notification.service';
+import styles from './index.css'
 
 // export const [timeItems, setTimeItems] = createStore<ITimeItem[]>([])
 export const [countdownStarted, setCountdownStarted] = createSignal<boolean>(false)//TODO hent verdi fra localstorage

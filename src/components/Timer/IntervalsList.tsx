@@ -29,7 +29,7 @@ import {
 // import { timeItems, setTimeItems, currentTimeItem, countdownStarted } from '../../App';
 import { parseTime } from '../Services/timer.service';
 import { TransitionGroup } from 'solid-transition-group';
-import { ITimeItem } from './ITimeItem';
+import { ITimeItem } from './TimeItemsProvider';
 import { useTimer } from './TimeItemsProvider';
 import { countdownStarted, currentTimeItem, isPaused } from '../../App';
 import { FiArrowDown, FiArrowUp, FiEdit, FiMoreVertical } from 'solid-icons/fi';
