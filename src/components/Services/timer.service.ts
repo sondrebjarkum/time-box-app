@@ -1,5 +1,8 @@
 import { storage } from "./storage.service";
 
+export interface IAlarmProperties{
+    volume : "25" | "50"| "75"| "100"
+}
 export const parseTime = (SECONDS : any) => new Date(SECONDS * 1000).toISOString().substr(11, 8);
 
 export const playAlert = (file: string, properties ?: IAlarmProperties) => {
@@ -10,6 +13,6 @@ export const playAlert = (file: string, properties ?: IAlarmProperties) => {
 }
 
 export const listAlarmFileNames = ["default","clicks", "dark", "shrek", "onions", "arnold", "airhorn", "bruh", "msn", "phil"]
-export interface IAlarmProperties{
-    volume : "25" | "50"| "75"| "100"
-}
+export const listAlarmFileNamesReg = ["default","clicks", "dark"]
+export const listAlarmFileNamesMeme = ["shrek", "onions", "arnold", "airhorn", "bruh", "msn", "phil"]
+

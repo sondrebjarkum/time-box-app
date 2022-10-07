@@ -30,8 +30,10 @@ import {
     TabPanel,
     Tabs,
     VStack,
+    SelectOptGroup,
+    SelectLabel,
 } from "@hope-ui/solid"
-import { IAlarmProperties, listAlarmFileNames, playAlert } from '../Services/timer.service';
+import { IAlarmProperties, listAlarmFileNames, listAlarmFileNamesMeme, listAlarmFileNamesReg, playAlert } from '../Services/timer.service';
 import { showNotification } from '../Services/notification.service';
 import { storage } from '../Services/storage.service';
 import CCheckbox from '../Custom/CCheckbox';
@@ -133,14 +135,28 @@ const SidebarMenu: Component = () => {
                                             </SelectTrigger>
                                             <SelectContent>
                                                 <SelectListbox>
-                                                    <For each={listAlarmFileNames}>
-                                                        {item => (
-                                                            <SelectOption value={item} >
-                                                                <SelectOptionText >{item}</SelectOptionText>
-                                                                <SelectOptionIndicator />
-                                                            </SelectOption>
-                                                        )}
-                                                    </For>
+                                                    <SelectOptGroup>
+                                                        <SelectLabel>Regular</SelectLabel>
+                                                        <For each={listAlarmFileNamesReg}>
+                                                            {item => (
+                                                                <SelectOption value={item} >
+                                                                    <SelectOptionText >{item}</SelectOptionText>
+                                                                    <SelectOptionIndicator />
+                                                                </SelectOption>
+                                                            )}
+                                                        </For>
+                                                    </SelectOptGroup>
+                                                    <SelectOptGroup>
+                                                        <SelectLabel>Memes</SelectLabel>
+                                                        <For each={listAlarmFileNamesMeme}>
+                                                            {item => (
+                                                                <SelectOption value={item} >
+                                                                    <SelectOptionText >{item}</SelectOptionText>
+                                                                    <SelectOptionIndicator />
+                                                                </SelectOption>
+                                                            )}
+                                                        </For>
+                                                    </SelectOptGroup>
                                                 </SelectListbox>
                                             </SelectContent>
                                         </Select>

@@ -24,7 +24,8 @@ import {
     FormLabel,
     Input,
     VStack,
-    IconButton
+    IconButton,
+    Container
 } from "@hope-ui/solid"
 // import { timeItems, setTimeItems, currentTimeItem, countdownStarted } from '../../App';
 import { parseTime } from '../Services/timer.service';
@@ -36,6 +37,8 @@ import { FiArrowDown, FiArrowUp, FiEdit, FiMoreVertical } from 'solid-icons/fi';
 import { showNotification } from '../Services/notification.service';
 import { createStore } from 'solid-js/store';
 import { storage } from '../Services/storage.service';
+import { setTimeout } from 'timers/promises';
+
 
 
 const IntervalsList: Component<{ currentTime: number }> = (props) => {
@@ -48,26 +51,55 @@ const IntervalsList: Component<{ currentTime: number }> = (props) => {
             countdownStarted() ? gradient() : isPaused() ? "$neutral5" : "$default" : "$default"
 
     const [intervalForEdit, setIntervalForEdit] = createStore<ITimeItem>({ id: "", time: 0, label: "" })
+    const [animate, setAnimate] = createSignal("") 
 
     const openEditTimeItemModal = (id: string) => {
         const item = time.find((x: ITimeItem) => x.id == id)
-        const obj = {id: item.id, label: item.label, time: item.time}
+        const obj = { id: item.id, label: item.label, time: item.time }
         setIntervalForEdit(e => obj)
         onOpen()
     }
 
+    const animateStyle = css({
+        maxWidth: "50px",
+        height: "50px",
+        borderRadius: "50%",
+        pointerEvents: "none",
+        bg: "white",
+        filter: "opacity(0)",
+        animationName: "animateRearrange",
+        animationDuration: ".5s",
+
+    })
+    const animateContainer = css({
+        position: "absolute",
+        left: 0,
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        w: "100%",
+        h: "100%",
+        overflow: "hidden",
+        pointerEvents: "none"
+
+    })
+
     const shiftItem = (id: string, direction: "up" | "down") => {
+        animateRearrange(id)
         reArrange(id, direction)
+    }
+    const animateRearrange = (id: string) => {
+        setAnimate(e => id)
     }
 
     const saveInterval = () => {
-        try{
+        try {
             edit(intervalForEdit)
-        }catch(e){
+        } catch (e) {
             showNotification({
                 title: "Failure",
                 description: "Saving interval failed",
-                status : "danger"
+                status: "danger"
             })
             return
         }
@@ -76,18 +108,18 @@ const IntervalsList: Component<{ currentTime: number }> = (props) => {
             description: "Edits to interval saved!",
             status: "success"
         })
-        storage.write( "timerItems", storage.parse(time) as string )
+        storage.write("timerItems", storage.parse(time) as string)
         onClose()
     }
 
     const deleteInterval = () => {
-        try{
+        try {
             remove(intervalForEdit.id)
-        }catch(e){
+        } catch (e) {
             showNotification({
                 title: "failure",
                 description: "Deleting interval failed",
-                status : "danger"
+                status: "danger"
             })
             return
         }
@@ -96,7 +128,7 @@ const IntervalsList: Component<{ currentTime: number }> = (props) => {
             description: "Interval deleted",
             status: "success"
         })
-        storage.write( "timerItems", storage.parse(time) as string )
+        storage.write("timerItems", storage.parse(time) as string)
         onClose()
     }
 
@@ -131,9 +163,10 @@ const IntervalsList: Component<{ currentTime: number }> = (props) => {
                             (timeItem: ITimeItem) => {
                                 return (
                                     <Tr
-
                                         // bg={isCurrentTimedRow(timeItem.id as string)}
                                         pos={"relative"}
+                                        // class={animate()}
+                                        ref={animate}
                                     >
                                         <Td>{timeItem.label}</Td>
                                         <Td numeric>{parseTime(timeItem.time)}</Td>
@@ -142,7 +175,7 @@ const IntervalsList: Component<{ currentTime: number }> = (props) => {
                                             <HStack>
                                                 <VStack>
                                                     <IconButton
-                                                size={"xs"}
+                                                        size={"xs"}
 
                                                         disabled={countdownStarted()}
                                                         onClick={() => shiftItem(timeItem.id as string, "up")}
@@ -151,7 +184,7 @@ const IntervalsList: Component<{ currentTime: number }> = (props) => {
                                                         colorScheme="accent" icon={<FiArrowUp />}>
                                                     </IconButton>
                                                     <IconButton
-                                                size={"xs"}
+                                                        size={"xs"}
 
                                                         disabled={countdownStarted()}
                                                         onClick={() => shiftItem(timeItem.id as string, "down")}
@@ -176,6 +209,15 @@ const IntervalsList: Component<{ currentTime: number }> = (props) => {
                                                 class={bgShifter()}
                                                 w={props.currentTime / time[currentTimeItem()]?.time * 100 + "%"}
                                             />
+                                        </Show>
+
+                                        <Show when={(animate() == timeItem.id && !countdownStarted())}>
+                                            <Container class={animateContainer()}>
+                                                <Box
+                                                    class={animateStyle()}
+                                                    w={"100%"}
+                                                />
+                                            </Container>
                                         </Show>
 
 
@@ -205,16 +247,16 @@ const IntervalsList: Component<{ currentTime: number }> = (props) => {
                     <ModalBody>
                         <FormControl id="label" mb="$4">
                             <FormLabel>Label</FormLabel>
-                            <Input placeholder="Label" value={intervalForEdit.label} onChange={(e : any) => setIntervalForEdit("label", e.target.value)} />
+                            <Input placeholder="Label" value={intervalForEdit.label} onChange={(e: any) => setIntervalForEdit("label", e.target.value)} />
                         </FormControl>
                         <FormControl id="minutes">
                             <FormLabel>Minutes</FormLabel>
-                            <Input placeholder="Minutes" value={intervalForEdit.time / 60} onChange={(e : any) => setIntervalForEdit("time", e.target.value * 60)} />
+                            <Input placeholder="Minutes" value={intervalForEdit.time / 60} onChange={(e: any) => setIntervalForEdit("time", e.target.value * 60)} />
                         </FormControl>
                     </ModalBody>
                     <ModalFooter gap={"$4"}>
-                        <Button colorScheme={"danger"} variant="ghost" onClick={() => {deleteInterval(); onClose}}>Delete</Button>
-                        <Button onClick={() => {saveInterval(); onClose}}>Save</Button>
+                        <Button colorScheme={"danger"} variant="ghost" onClick={() => { deleteInterval(); onClose }}>Delete</Button>
+                        <Button onClick={() => { saveInterval(); onClose }}>Save</Button>
                     </ModalFooter>
                 </ModalContent>
             </Modal>
